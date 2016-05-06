@@ -1,5 +1,8 @@
 package net.kingsbery.baseball;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class BaseballMatch {
 
 	int strikes = 0;
@@ -10,6 +13,80 @@ public class BaseballMatch {
 	
 	int halfInning = 1;
 	int outs = 0;
+	
+	List<Integer> runsPerInning = new ArrayList<Integer>();
+	
+	public static class Runner{
+		
+	}
+
+	
+	Runner[] baseRunners = new Runner[4];
+	private int runs;
+	
+	public void putRunnerOn(Runner runner, int base){
+		putRunnerOn(runner, base, 0);
+	}
+	
+	private void putRunnerOn(Runner runner, int base, int from){
+		if(base >= 4){
+			System.out.println("Run Scored!");
+			runs++;
+		}
+		else if(baseRunners[base] == null){
+			baseRunners[base] = runner;
+			baseRunners[from] = null;
+		} else {
+			putRunnerOn(baseRunners[base], base + 1, base);
+			baseRunners[base] = runner;
+		}
+	}
+	
+	public void advanceRunners(PitchOutcome pitch){
+		switch(pitch){
+		case Single:
+			for (int i = 2; i < baseRunners.length; i++) {
+				if (baseRunners[i] != null) {
+					runs++;
+					baseRunners[i] = null;
+				}
+			}
+			if(baseRunners[1]!=null){
+				putRunnerOn(baseRunners[1], 2, 1);
+			}
+			putRunnerOn(new Runner(), 1);
+			break;
+		case Double:
+			for (int i = 0; i < baseRunners.length; i++) {
+				if (baseRunners[i] != null) {
+					runs++;
+					baseRunners[i] = null;
+				}
+			}
+			putRunnerOn(new Runner(), 2);
+			break;
+		case Triple:
+			for (int i = 0; i < baseRunners.length; i++) {
+				if (baseRunners[i] != null) {
+					runs++;
+					baseRunners[i] = null;
+				}
+			}
+			putRunnerOn(new Runner(), 3);
+			break;
+		case HR:
+			for (int i = 0; i < baseRunners.length; i++) {
+				if (baseRunners[i] != null) {
+					runs++;
+					baseRunners[i] = null;
+				}
+			}
+			runs++;
+			break;
+		default:
+			//For now, nothing happens
+		}
+	}
 	
 	public void next(PitchOutcome pitch){
 		switch(pitch){
@@ -24,6 +101,8 @@ public class BaseballMatch {
 			balls++;
 			if(balls == 4){
 				System.out.println("Take your base!");
+				putRunnerOn(new Runner(),1);
+
 				nextBatter();
 			}
 			break;
@@ -41,11 +120,20 @@ public class BaseballMatch {
 		case Double:
 		case Triple:
 		case HR:
+			advanceRunners(pitch);
 			System.out.println(pitch);
 			hits++;
 			nextBatter();
 			break;
 		}
+	}
+	
+	public Runner getRunnerOn(int base){
+		return baseRunners[base];
+	}
+	
+	public int getRunsThisInning(){
+		return runs;
 	}
 	
 	private void recordOut() {
@@ -55,19 +143,31 @@ public class BaseballMatch {
 		}else {
 			nextBatter();
 		}
-		
 	}
 
+	public int getRuns(int team){
+		int totalRuns = 0;
+		for(int i = team; i<runsPerInning.size(); i+=2){
+			totalRuns+=runsPerInning.get(i);
+		}
+		return totalRuns;
+	}
+	
 	private String topOrBottom(){
 		return halfInning % 2 == 0 ? "Bottom" : "Top"; 
 	}
 	
 	private void nextInning() {
-		
+		System.out.print(topOrBottom() + " of the " + ((halfInning+1)/2) + ": " );
+		System.out.println(runs + " runs scored");
 		halfInning++;
-		System.out.println(topOrBottom() + " of the " + (halfInning/2) );
+		
+		
 		System.out.println("==============================");
+		runsPerInning.add(runs);
+		runs = 0;
 		outs = 0;
+		baseRunners = new Runner[4];
 		nextBatter();
 	}
 
@@ -78,7 +178,7 @@ public class BaseballMatch {
 	}
 	
 	public boolean stillPlaying(){
-		return getInning() <= 9; //or, extra innings...
+		return halfInning <= 18; //or, extra innings...
 	}
 	
 	public int getInning(){

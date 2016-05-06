@@ -12,9 +12,7 @@ public class App {
 		}
 		System.out.println("Total hits: " + match.getHits());
 		System.out.println("Total batters: " + match.getBatterCount());
+		System.out.println("Final score: Home team " + match.getRuns(1) + ", Away Team " + match.getRuns(0));
 	}
-	
-	
-	
 	
 }
