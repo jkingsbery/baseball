@@ -7,8 +7,9 @@ package net.kingsbery.baseball;
 public class App {
 	public static void main(String[] args) {
 		BaseballMatch match = new BaseballMatch();
+		PitchSimulator simulator = new PitchSimulator();
 		while(match.stillPlaying()){
-			match.next(PitchSimulator.pitch());
+			match.next(simulator.pitch());
 		}
 		System.out.println("Total hits: " + match.getHits());
 		System.out.println("Total batters: " + match.getBatterCount());

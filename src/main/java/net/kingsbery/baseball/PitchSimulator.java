@@ -1,14 +1,15 @@
 package net.kingsbery.baseball;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 public class PitchSimulator {
 
-	public static Random random = new Random(42);
+	public Random random = new Random(42);
 
-	public static PitchOutcome pitch() {
+	public PitchOutcome pitch() {
 		// first calculate probabilities
 		Map<PitchOutcome, Double> probs = getProbabilities();
 
@@ -25,7 +26,7 @@ public class PitchSimulator {
 		throw new AssertionError("The probabilities did not add up to 1");
 	}
 
-	private static Map<PitchOutcome, Double> getProbabilities() {
+	public Map<PitchOutcome, Double> getProbabilities() {
 		Map<PitchOutcome, Double> probs = new HashMap<PitchOutcome, Double>();
 		double singleLikelihood = 0.6;
 		double doubleLikelihood = 0.2;
@@ -44,15 +45,7 @@ public class PitchSimulator {
 		probs.put(PitchOutcome.Double, 1.0 * contactMadeProb * hitFair * hitProbability * doubleLikelihood);
 		probs.put(PitchOutcome.Triple, 1.0 * contactMadeProb * hitFair * hitProbability * tripleLikelihood);
 		probs.put(PitchOutcome.HR, 1.0 * contactMadeProb * hitFair * hitProbability * hrLikelihood);
-		return probs;
+		return Collections.unmodifiableMap(probs);
 	}
 
-	public static void main(String args[]) {
-		Map<PitchOutcome, Double> probs = getProbabilities();
-		double total = 0.0;
-		for (double x : probs.values()) {
-			total += x;
-		}
-		System.out.println(total);
-	}
 }

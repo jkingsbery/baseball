@@ -3,6 +3,8 @@ package net.kingsbery.baseball;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.kingsbery.baseball.Season.Team;
+
 public class BaseballMatch {
 
 	int strikes = 0;
@@ -20,10 +22,25 @@ public class BaseballMatch {
 		
 	}
 
+	public String toString(){
+		return this.away + " vs. " + this.home;
+	}
 	
 	Runner[] baseRunners = new Runner[4];
 	private int runs;
+	private Team home;
+	private Team away;
 	
+	public BaseballMatch(){
+		this(null, null);
+	}
+	
+	public BaseballMatch(Team away, Team home) {
+		this.home = home;
+		this.away = away;
+		// TODO Auto-generated constructor stub
+	}
+
 	public void putRunnerOn(Runner runner, int base){
 		putRunnerOn(runner, base, 0);
 	}
