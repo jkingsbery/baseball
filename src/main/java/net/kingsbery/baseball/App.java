@@ -8,12 +8,10 @@ public class App {
 	public static void main(String[] args) {
 		BaseballMatch match = new BaseballMatch();
 		PitchSimulator simulator = new PitchSimulator();
-		while(match.stillPlaying()){
-			match.next(simulator.pitch());
-		}
-		System.out.println("Total hits: " + match.getHits());
-		System.out.println("Total batters: " + match.getBatterCount());
-		System.out.println("Final score: Home team " + match.getRuns(1) + ", Away Team " + match.getRuns(0));
+		match.simulateMatch(simulator);
+		match.printResults();
 	}
+
+	
 	
 }
