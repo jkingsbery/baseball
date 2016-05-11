@@ -77,7 +77,7 @@ public class Season {
 		}
 	}
 
-	private void printSchedule() {
+	public void printSchedule() {
 		for (int i = 0; i < schedule.size(); i++) {
 			System.out.println((i + 1) + ": " + schedule.get(i));
 		}
@@ -163,19 +163,6 @@ public class Season {
 		return schedule.size();
 	}
 
-	public static void main(String args[]) {
-		Season season = new Season();
-		season.printSchedule();
-		long start = System.nanoTime();
-		for (int i = 0; i < season.getNumberOfDays(); i++) {
-			season.simulate(i);
-		}
-		long end = System.nanoTime();
-		System.out.println("Simulation took " + (end - start));
-		season.printSchedule();
-		season.printStandings();
-	}
-
 	private static class StandingsEntry  implements Comparable<StandingsEntry>{
 		Team team;
 		int win = 0;
@@ -197,7 +184,7 @@ public class Season {
 		}
 	}
 
-	private void printStandings() {
+	public void printStandings() {
 		Map<Team, StandingsEntry> standings = new HashMap<Team, StandingsEntry>();
 		for (Team team : teams) {
 			standings.put(team, new StandingsEntry(team));
@@ -256,5 +243,24 @@ public class Season {
 		};
 		return result;
 	}
+	
+	public void simulate() {
+		for (int i = 0; i < getNumberOfDays(); i++) {
+			simulate(i);
+		}
+	}
+	
+	public static void main(String args[]) {
+		Season season = new Season();
+		season.printSchedule();
+		long start = System.nanoTime();
+		season.simulate();
+		long end = System.nanoTime();
+		System.out.println("Simulation took " + (end - start));
+		season.printSchedule();
+		season.printStandings();
+	}
+
+	
 
 }

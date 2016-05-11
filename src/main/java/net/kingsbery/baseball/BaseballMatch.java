@@ -274,4 +274,9 @@ public class BaseballMatch {
 		}
 	}
 
+	public void simulate() {
+		PitchSimulator simulator = new PitchSimulator();
+		simulateMatch(simulator);
+	}
+
 }
