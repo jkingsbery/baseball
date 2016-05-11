@@ -5,12 +5,7 @@ package net.kingsbery.baseball;
  *
  */
 public class App {
-	public static void main(String[] args) {
-		BaseballMatch match = new BaseballMatch();
-		PitchSimulator simulator = new PitchSimulator();
-		match.simulateMatch(simulator);
-		match.printResults();
-	}
+	
 
 	
 	

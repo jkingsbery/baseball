@@ -2,6 +2,7 @@ package net.kingsbery.baseball;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.kingsbery.baseball.events.*;
 
 public class BaseballMatch {
 
@@ -16,12 +17,10 @@ public class BaseballMatch {
 
 	List<Integer> runsPerInning = new ArrayList<Integer>();
 
+	MatchEventHandler handler = new DefaultMatchEventHandler();
+
 	public static class Runner {
 
-	}
-
-	public String toString() {
-		return this.away + " vs. " + this.home;
 	}
 
 	Runner[] baseRunners = new Runner[4];
@@ -36,26 +35,38 @@ public class BaseballMatch {
 	public BaseballMatch(Team away, Team home) {
 		this.home = home;
 		this.away = away;
-		// TODO Auto-generated constructor stub
 	}
 
-	//TODO PitchSimulator will come from a different source at some point
-	void simulateMatch(PitchSimulator simulator) {
-		System.out.println("+++++++++++++++++++++");
-		System.out.println(away + " vs. " + home);
-		System.out.println("+++++++++++++++++++++");
-		while(stillPlaying()){
-			next(simulator.pitch());
+	public String toString() {
+		if(notStarted()){
+			return this.away + " vs. " + this.home;
+		}else if(stillPlaying()){
+			return this.away + " " + getRuns(0)+ ", " + this.home + " " + this.getRuns(1);
+		}else{
+			return "final score: " +  this.away + " " + getRuns(0)+ ", " + this.home + " " + this.getRuns(1);
 		}
 	}
-	
+
+	public void setHandler(MatchEventHandler handler) {
+		this.handler = handler;
+	}
+
+	// TODO PitchSimulator will come from a different source at some point
+	void simulateMatch(PitchSimulator simulator) {
+		handler.matchStart(this);
+		while (stillPlaying()) {
+			next(simulator.pitch());
+		}
+		handler.endOfMatch(this);
+	}
+
 	public void putRunnerOn(Runner runner, int base) {
 		putRunnerOn(runner, base, 0);
 	}
 
 	private void putRunnerOn(Runner runner, int base, int from) {
 		if (base >= 4) {
-			System.out.println("Run Scored!");
+			handler.runScored(this);
 			runs++;
 		} else if (baseRunners[base] == null) {
 			baseRunners[base] = runner;
@@ -108,7 +119,7 @@ public class BaseballMatch {
 			runs++;
 			break;
 		default:
-			// For now, nothing happens
+			// For now, nothing happens on outs
 		}
 	}
 
@@ -117,14 +128,14 @@ public class BaseballMatch {
 		case Strike:
 			strikes++;
 			if (strikes == 3) {
-				System.out.println("Strike 3!");
+				handler.strikeOut();
 				recordOut();
 			}
 			break;
 		case Ball:
 			balls++;
 			if (balls == 4) {
-				System.out.println("Take your base!");
+				handler.walk();
 				putRunnerOn(new Runner(), 1);
 
 				nextBatter();
@@ -137,7 +148,7 @@ public class BaseballMatch {
 			break;
 		case GroundOut:
 		case PopOut:
-			System.out.println(pitch);
+			handler.playResult(pitch);
 			recordOut();
 			break;
 		case Single:
@@ -145,7 +156,7 @@ public class BaseballMatch {
 		case Triple:
 		case HR:
 			advanceRunners(pitch);
-			System.out.println(pitch);
+			handler.playResult(pitch);
 			hits++;
 			nextBatter();
 			break;
@@ -177,16 +188,15 @@ public class BaseballMatch {
 		return totalRuns;
 	}
 
-	private String topOrBottom() {
+	public String topOrBottom() {
 		return halfInning % 2 == 0 ? "Bottom" : "Top";
 	}
 
 	private void nextInning() {
-		System.out.print(topOrBottom() + " of the " + ((halfInning + 1) / 2) + ": ");
-		System.out.println(runs + " runs scored");
+		handler.nextInning(this, runs);
+
 		halfInning++;
 
-		System.out.println("==============================");
 		runsPerInning.add(runs);
 		runs = 0;
 		outs = 0;
@@ -204,8 +214,12 @@ public class BaseballMatch {
 		return halfInning <= 18; // or, extra innings...
 	}
 
+	private boolean notStarted() {
+		return halfInning == 1 ;
+	}
+
 	public int getInning() {
-		return halfInning / 2;
+		return (halfInning + 1) / 2;
 	}
 
 	public int getHits() {
@@ -217,13 +231,47 @@ public class BaseballMatch {
 	}
 
 	public boolean has(Team team0, Team team1) {
-		return (home==team0 && away == team1 )|| (home == team1 && away == team0); 
+		return (home == team0 && away == team1) || (home == team1 && away == team0);
 	}
 
-	public void printResults() {
-		System.out.println("Total hits: " + getHits());
-		System.out.println("Total batters: " + getBatterCount());
-		System.out.println("Final score: Home team " + getRuns(1) + ", Away Team " + getRuns(0));
-		
+	public Team getAwayTeam() {
+		return away;
 	}
+
+	public Team getHomeTeam() {
+		return home;
+	}
+
+	public static void main(String[] args) {
+		BaseballMatch match = new BaseballMatch();
+		PitchSimulator simulator = new PitchSimulator();
+		match.simulateMatch(simulator);
+	}
+
+	public Team getLosingTeam() {
+		if(getRuns(0)==getRuns(1)){
+			return null;
+		}
+		else if(getRuns(0) < getRuns(1)){
+			return away;
+		} else{
+			return home;
+		}
+	}
+
+	public static int tieCounter = 0;
+
+	public Team getWinningTeam() {
+		if(getRuns(0)==getRuns(1)){
+			tieCounter++;
+			System.err.println("TIE #" + tieCounter);
+			return null;
+		}
+		else if(getRuns(0) > getRuns(1)){
+			return away;
+		} else{
+			return home;
+		}
+	}
+
 }

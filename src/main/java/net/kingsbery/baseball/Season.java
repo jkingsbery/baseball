@@ -2,12 +2,17 @@ package net.kingsbery.baseball;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import net.kingsbery.baseball.events.MatchEventHandler;
+import net.kingsbery.baseball.events.QuietMatchEventHandler;
 
 public class Season {
 
@@ -47,7 +52,6 @@ public class Season {
 		this.teams = teams;
 		scheduleSeries();
 		seriesToGames();
-		printSchedule();
 	}
 
 	public Season() {
@@ -143,11 +147,15 @@ public class Season {
 		return result;
 	}
 
+	MatchEventHandler quiet = new QuietMatchEventHandler();
+
+	PitchSimulator simulator = new PitchSimulator();
+
 	public void simulate(int day) {
-		PitchSimulator simulator = new PitchSimulator();
+
 		for (BaseballMatch match : schedule.get(day)) {
+			match.setHandler(quiet);
 			match.simulateMatch(simulator);
-			match.printResults();
 		}
 	}
 
@@ -157,12 +165,96 @@ public class Season {
 
 	public static void main(String args[]) {
 		Season season = new Season();
+		season.printSchedule();
 		long start = System.nanoTime();
 		for (int i = 0; i < season.getNumberOfDays(); i++) {
 			season.simulate(i);
 		}
 		long end = System.nanoTime();
 		System.out.println("Simulation took " + (end - start));
+		season.printSchedule();
+		season.printStandings();
+	}
+
+	private static class StandingsEntry  implements Comparable<StandingsEntry>{
+		Team team;
+		int win = 0;
+		int loss = 0;
+		int runsFor = 0;
+		int runsAgainst;
+
+		public StandingsEntry(Team team){
+			this.team = team;
+		}
+
+		@Override
+		public int compareTo(StandingsEntry o) {
+			return o.win - this.win;
+		}
+
+		public String toString(){
+			return team + ": " + win + "-" + loss+ " RF: " + runsFor + " RA: " + runsAgainst;
+		}
+	}
+
+	private void printStandings() {
+		Map<Team, StandingsEntry> standings = new HashMap<Team, StandingsEntry>();
+		for (Team team : teams) {
+			standings.put(team, new StandingsEntry(team));
+		}
+		for (BaseballMatch match : completedGames()) {
+			if(match.getLosingTeam()!=null){
+				standings.get(match.getLosingTeam()).loss++;
+			}
+			if(match.getWinningTeam()!=null){
+				standings.get(match.getWinningTeam()).win++;
+			}
+			standings.get(match.getAwayTeam()).runsFor+= match.getRuns(0);
+			standings.get(match.getAwayTeam()).runsAgainst+= match.getRuns(1);
+			standings.get(match.getHomeTeam()).runsFor+= match.getRuns(1);
+			standings.get(match.getHomeTeam()).runsAgainst+= match.getRuns(0);
+		}
+
+		List<StandingsEntry> table =  new ArrayList<StandingsEntry>( standings.values());
+		Collections.sort(table);
+		for (StandingsEntry entry : table) {
+			System.out.println(entry);
+		}
+
+	}
+
+	private Iterable<BaseballMatch> completedGames() {
+
+		Iterable<BaseballMatch> result = new Iterable<BaseballMatch>() {
+
+			@Override
+			public Iterator<BaseballMatch> iterator() {
+				return new Iterator<BaseballMatch>() {
+					int day = 0;
+					int game = 0;
+
+					@Override
+					public boolean hasNext() {
+						return schedule.containsKey(day) && !schedule.get(day).get(0).stillPlaying();
+					}
+
+					@Override
+					public BaseballMatch next() {
+						BaseballMatch match;
+						System.out.println(day + ", " + game + ": "+schedule.get(day));
+						match = schedule.get(day).get(game);
+						game++;
+						if (game >= schedule.get(day).size()) {
+							game = 0;
+							day++;
+						}
+						return match;
+					}
+				};
+			}
+
+		};
+		return result;
 	}
 
 }

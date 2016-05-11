@@ -33,7 +33,7 @@ public class PitchSimulator {
 		double tripleLikelihood = 0.05;
 		double hrLikelihood = 0.15;
 		double contactMadeProb = 1.0 / 3;
-		double hitProbability = 0.27;
+		double hitProbability = 0.3;
 		double hitFair = 0.7;
 		double groundOutProb = 0.5;
 		probs.put(PitchOutcome.Ball, 1.0 * (1 - contactMadeProb) * 0.5);

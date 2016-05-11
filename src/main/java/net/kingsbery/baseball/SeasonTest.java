@@ -17,8 +17,11 @@ public class SeasonTest {
 		Team team0 = season.getTeams().get(0);
 		Team team1 = season.getTeams().get(1);
 		
-		List<Series> matches = season.getSeries(team0, team1);
+		List<Series> series = season.getSeries(team0, team1);
+		List<BaseballMatch> matches = season.getMatches(team0, team1);
+		System.out.println(series);
 		System.out.println(matches);
+		assertTrue(series.size() > 1);
 		assertTrue(matches.size() > 1);
 	}
 }
