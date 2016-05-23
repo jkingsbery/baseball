@@ -1,7 +1,7 @@
 package net.kingsbery.baseball.events;
 
 import net.kingsbery.baseball.BaseballMatch;
-import net.kingsbery.baseball.PitchOutcome;
+import net.kingsbery.baseball.pitches.PitchOutcome;
 
 /**
  * When simulating many games, this event handler is much faster than

@@ -2,7 +2,6 @@ package net.kingsbery.baseball;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,6 +12,8 @@ import java.util.Random;
 
 import net.kingsbery.baseball.events.MatchEventHandler;
 import net.kingsbery.baseball.events.QuietMatchEventHandler;
+import net.kingsbery.baseball.pitches.DefaultPitchSimulatorFactory;
+import net.kingsbery.baseball.pitches.PitchSimulatorFactory;
 
 public class Season {
 
@@ -55,20 +56,14 @@ public class Season {
 	}
 
 	public Season() {
-		List<Team> teams = defaultTeams();
+		List<Team> teams = Team.defaultTeams();
 		this.teams = teams;
 		scheduleSeries();
 		seriesToGames();
 		printSchedule();
 	}
 
-	private List<Team> defaultTeams() {
-		List<Team> teams = new ArrayList<Team>();
-		for (int i = 0; i < 14; i++) {
-			teams.add(new Team(Integer.toString(i)));
-		}
-		return teams;
-	}
+	
 
 	private void scheduleSeries() {
 		List<Team> teamRoundRobin = new LinkedList<Team>(teams);
@@ -149,7 +144,7 @@ public class Season {
 
 	MatchEventHandler quiet = new QuietMatchEventHandler();
 
-	PitchSimulator simulator = new PitchSimulator();
+	PitchSimulatorFactory simulator = new DefaultPitchSimulatorFactory();
 
 	public void simulate(int day) {
 

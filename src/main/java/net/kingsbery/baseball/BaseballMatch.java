@@ -2,7 +2,14 @@ package net.kingsbery.baseball;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.kingsbery.baseball.events.*;
+
+import net.kingsbery.baseball.events.DefaultMatchEventHandler;
+import net.kingsbery.baseball.events.MatchEventHandler;
+import net.kingsbery.baseball.pitches.DefaultPitchSimulatorFactory;
+import net.kingsbery.baseball.pitches.PitchOutcome;
+import net.kingsbery.baseball.pitches.PitchSimulator;
+import net.kingsbery.baseball.pitches.PitchSimulatorFactory;
+import net.kingsbery.baseball.players.Player;
 
 public class BaseballMatch {
 
@@ -26,7 +33,9 @@ public class BaseballMatch {
 	Runner[] baseRunners = new Runner[4];
 	private int runs;
 	private Team home;
+	int[] lineupPos = new int[]{0,0};
 	private Team away;
+	private Player batter;
 
 	public BaseballMatch() {
 		this(new Team("away"), new Team("home"));
@@ -52,9 +61,12 @@ public class BaseballMatch {
 	}
 
 	// TODO PitchSimulator will come from a different source at some point
-	void simulateMatch(PitchSimulator simulator) {
+	void simulateMatch(PitchSimulatorFactory factory) {
 		handler.matchStart(this);
 		while (stillPlaying()) {
+			Player pitcher = Player.buildPitcher();
+			Player batter = Player.buildBatter();
+			PitchSimulator simulator = factory.getSimulator(pitcher, batter);
 			next(simulator.pitch());
 		}
 		handler.endOfMatch(this);
@@ -173,6 +185,7 @@ public class BaseballMatch {
 
 	private void recordOut() {
 		outs++;
+		batter.getStats().onOut();
 		if (outs == 3) {
 			nextInning();
 		} else {
@@ -189,7 +202,11 @@ public class BaseballMatch {
 	}
 
 	public String topOrBottom() {
-		return halfInning % 2 == 0 ? "Bottom" : "Top";
+		return teamAtBat() == 0 ? "Bottom" : "Top";
+	}
+
+	private int teamAtBat() {
+		return halfInning % 2;
 	}
 
 	private void nextInning() {
@@ -205,6 +222,7 @@ public class BaseballMatch {
 	}
 
 	public void nextBatter() {
+		
 		totalAtBats++;
 		strikes = 0;
 		balls = 0;
@@ -244,8 +262,7 @@ public class BaseballMatch {
 
 	public static void main(String[] args) {
 		BaseballMatch match = new BaseballMatch();
-		PitchSimulator simulator = new PitchSimulator();
-		match.simulateMatch(simulator);
+		match.simulate();
 	}
 
 	public Team getLosingTeam() {
@@ -275,7 +292,7 @@ public class BaseballMatch {
 	}
 
 	public void simulate() {
-		PitchSimulator simulator = new PitchSimulator();
+		PitchSimulatorFactory simulator = new DefaultPitchSimulatorFactory();
 		simulateMatch(simulator);
 	}
 

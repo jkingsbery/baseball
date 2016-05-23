@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import net.kingsbery.baseball.pitches.PitchOutcome;
+
 public class BaseballMatchTest {
 
 	@Test

@@ -1,4 +1,4 @@
-package net.kingsbery.baseball;
+package net.kingsbery.baseball.pitches;
 
 public enum PitchOutcome {
 	Ball,

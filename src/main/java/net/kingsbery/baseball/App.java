@@ -3,6 +3,7 @@ package net.kingsbery.baseball;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
 public class App {
 	
@@ -23,6 +24,12 @@ public class App {
 			}else if("game".equals(command)){
 				BaseballMatch match = new BaseballMatch();
 				match.simulate();
+			}else if("team".equals(command)){
+				List<Team> teams = Team.defaultTeams();
+				System.out.println(teams);
+			}else if(Team.TEAM_NAMES.contains(command)){
+				System.out.println(Team.getTeam(command).getLineup());
+				
 			}else{
 				System.out.println("Unknown command: " + command);
 			}
